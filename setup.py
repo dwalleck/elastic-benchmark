@@ -20,4 +20,4 @@ setup(
     ),
     entry_points={
         'console_scripts': [
-            'elastic-benchmark = elastic_benchmark.parse_results:entry_point']})
+            'elastic-benchmark = elastic_benchmark.parse_results:entry']})
