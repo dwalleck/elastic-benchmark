@@ -4,7 +4,7 @@ import json
 import sys
 import uuid
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
 
 
 def parse_rally_results(raw_results, log_link):
@@ -75,6 +75,18 @@ class ArgumentParser(argparse.ArgumentParser):
         self.add_argument(
             "-l", "--logs", metavar="<log link>",
             required=False, default=None, help="A link to the logs.")
+        
+        self.add_argument(
+            "--host", metavar="<host>",
+            required=False, default=None, help="")
+
+        self.add_argument(
+            "-u", "--user", metavar="<user>",
+            required=False, default=None, help="")
+        
+        self.add_argument(
+            "-p", "--password", metavar="<password>",
+            required=False, default=None, help="")
 
         self.add_argument('input', nargs='?', type=argparse.FileType('r'),
                           default=sys.stdin)
@@ -83,8 +95,16 @@ class ArgumentParser(argparse.ArgumentParser):
 def entry():
     cl_args = ArgumentParser().parse_args()
     result_data = parse_rally_results(cl_args.input.read(), cl_args.logs)
+    
+    es_kwargs = {}
+    if cl_args.host:
+        es_kwargs['hosts'] = [cl_args.host]
+    
+    if cl_args.user and cl_args.password:
+        es_kwargs['connection_class'] = RequestsHttpConnection
+        es_kwargs['http_auth'] = (cl_args.user, cl_args.password)
 
-    client = Elasticsearch()
+    client = Elasticsearch(**es_kwargs)
     for result in result_data:
         client.index(
             index='{0}_elastic_benchmark_results'.format(cl_args.environment),
