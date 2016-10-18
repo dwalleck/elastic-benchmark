@@ -28,8 +28,8 @@ def parse_rally_results(raw_results, log_link):
             duration = test_result.get('duration')
             outcome = 'pass' if len(test_result.get('error')) == 0 else 'fail'
             runner_config = result.get('key').get('kw').get('runner')
-            concurrency = runner_config.get('concurrency')
-            times = runner_config.get('times')
+            concurrency = int(runner_config.get('concurrency'))
+            times = int(runner_config.get('times'))
 
             # This is an ElasticBenchmark-specific concept. If a scenario is
             # run multiple times but with a concurrency of 1, the intent is to
@@ -38,8 +38,7 @@ def parse_rally_results(raw_results, log_link):
             # test is marked as a stress test, which determines the execution
             # time and success rate of a scenario being executed with the
             # given amount of concurrency
-            test_type = ("benchmark" if concurrency != "1" or times == "1"
-                         else "stress_test")
+            test_type = "benchmark" if concurrency == 1 else "stress_test"
             result_data.append({
                     "logs": log_link,
                     "test_type": test_type,
