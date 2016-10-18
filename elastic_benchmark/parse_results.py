@@ -15,8 +15,11 @@ def parse_rally_results(raw_results, log_link):
 
         # The alternate_name field is a hack to be able to provide an unqiue
         # name when running the same scenario with multiple configurations
-        scenario_name = result.get("key").get("kw").get("args").get(
-            "alternate_name") or result.get("key").get("name")
+        args = result.get("key").get("kw").get("args")
+        if args and "alternate_name" in args:
+            scenario_name = args.get("alternate_name")
+        else:
+            scenario_name = result.get("key").get("name")
 
         # Generate a unique UUID for the test run. Ideally, we would use
         # the uuid of the Rally run, but that information is not currently
